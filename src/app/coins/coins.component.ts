@@ -4,6 +4,12 @@ import {HttpClient, HttpHeaders} from '@angular/common/http';
 import {Coin} from "./model/CoinDataModel";
 
 
+function convertToPojo(value: Object) {
+  const str = JSON.stringify(value)
+  const pojo = JSON.parse(str)
+  return pojo;
+}
+
 @Component({
   selector: 'app-coins',
   templateUrl: './coins.component.html',
@@ -18,7 +24,7 @@ export class CoinsComponent implements OnInit {
   balance: Object | undefined = "0"
   message: string = "";
 
-  selectedCoinValue:string=""
+  selectedCoinValue: string = ""
   acceptedCoins: Coin[] = []
   selectedCoinControl = new FormControl('', [Validators.required])
   form = new FormGroup({
@@ -47,7 +53,7 @@ export class CoinsComponent implements OnInit {
       const str: string = JSON.stringify(balanceResponse)
       const balance = JSON.parse(str)
       this.balance = balance.balance;
-      console.log("Balance is: "+ balance.balance)
+      console.log("Balance is: " + balance.balance)
     });
 
   }
@@ -63,11 +69,26 @@ export class CoinsComponent implements OnInit {
     console.log(`Selected Coin Value on insertCoin(): ${this.selectedCoinValue}`)
     const selectedCoinValue = this.selectedCoinValue
     this.http.post("http://localhost:8080/coins/insert", selectedCoinValue, this.httpOptions)
-      .toPromise().then( () => this.updateBalance())
-
-
+      .toPromise().then(() => this.updateBalance())
 
   }
 
-
+  refundCoins():string {
+    var message = "";
+    this.http.put("http://localhost:8080/coins/refund", this.httpOptions).subscribe({
+      next(value) {
+        console.log(value)
+        const pojo = convertToPojo(value);
+        message = pojo.message;
+      },
+      error(e) {
+        console.log(e)
+        message = convertToPojo(e).message
+      },
+      complete() {
+        console.log('Coins ');
+      }
+    })
+    return message;
+  }
 }

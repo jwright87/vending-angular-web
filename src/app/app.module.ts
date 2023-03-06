@@ -5,13 +5,15 @@ import {AppComponent} from './app.component';
 import {FormsModule, ReactiveFormsModule} from '@angular/forms';
 import {CoinsComponent} from './coins/coins.component';
 import {DrinksComponent} from './drinks/drinks.component';
+import { StatusComponent } from './status/status.component';
 
 
 @NgModule({
   declarations: [
     AppComponent,
     CoinsComponent,
-    DrinksComponent
+    DrinksComponent,
+    StatusComponent
   ],
   imports: [
     BrowserModule,
