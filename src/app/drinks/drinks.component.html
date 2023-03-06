@@ -1,0 +1,12 @@
+<div>
+  <h2>Drinks</h2>
+<div [formGroup]="form">
+  <h2>Select Drink to purchase:</h2>
+  <select [formControl]="selectedDrink"  (change)="selectDrink($event)">
+    <option value='{"Coke"}'>Coke</option>
+    <option value='{"Pepsi"}'>Pepsi</option>
+    <option value='{"Lemonade"}'>Lemonade</option>
+  </select>
+  <button (click)="purchaseDrink()">Purchase Selected Drink</button>
+</div>
+</div>

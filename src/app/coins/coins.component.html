@@ -1,0 +1,16 @@
+<div>
+  <div [formGroup]="form" (ngSubmit)="insertCoin()">
+    <h2>Select Coin:</h2>
+    <select [formControl]="selectedCoin" (change)="selectCoin($event)">
+      <option value='{"FIVE_PENCE"}'>5p</option>
+      <option value='{"TEN_PENCE"}'>10p</option>
+      <option value='{"TWENTY_PENCE"}'>20p</option>
+      <option value='{"FIFTY_PENCE"}'>50p</option>
+      <option value='{"ONE_POUND"}'>£1</option>
+    </select>
+    <button (click)="insertCoin()">Insert Coin</button>
+  </div>
+
+  <div>Balance: {{balance}}</div>
+
+</div>
