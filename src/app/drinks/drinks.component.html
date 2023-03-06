@@ -1,11 +1,10 @@
 <div>
   <h2>Drinks</h2>
-<div [formGroup]="form">
+
+<div [formGroup]="drinkForm">
   <h2>Select Drink to purchase:</h2>
-  <select [formControl]="selectedDrink"  (change)="selectDrink($event)">
-    <option value='{"Coke"}'>Coke</option>
-    <option value='{"Pepsi"}'>Pepsi</option>
-    <option value='{"Lemonade"}'>Lemonade</option>
+  <select [formControl]="selectDrinkForPurchaseControl"  (change)="selectDrink($event)">
+    <option *ngFor="let drink of availableDrinks" [ngValue]=drink.name>{{drink.name}}</option>
   </select>
   <button (click)="purchaseDrink()">Purchase Selected Drink</button>
 </div>
