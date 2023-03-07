@@ -1,10 +1,8 @@
 import {Component, OnInit} from '@angular/core';
 import {HttpClient, HttpHeaders} from "@angular/common/http";
-import {Coin} from "../coins/model/CoinDataModel";
 import {FormControl, FormGroup, Validators} from "@angular/forms";
 import {Drink} from "./model/DrinksModelData";
-import {cleanPackageJson} from "@angular/compiler-cli/ngcc/src/packages/build_marker";
-import {map} from "rxjs";
+import {VendingService} from "../vending.service";
 
 @Component({
   selector: 'app-drinks',
@@ -18,9 +16,7 @@ export class DrinksComponent implements OnInit {
     headers: new HttpHeaders({'Content-Type': 'application/json'})
   }
 
-  selectedDrinkValue: string="";
-  form: any;
-
+  selectedDrinkValue: string = "";
   availableDrinks: Drink[] = []
   selectDrinkForPurchaseControl = new FormControl('', [Validators.required])
   drinkForm = new FormGroup({
@@ -29,7 +25,7 @@ export class DrinksComponent implements OnInit {
 
   purchasedDrink = null;
 
-  constructor(private http: HttpClient) {
+  constructor(private http: HttpClient, private vendingService: VendingService) {
 
   }
 
@@ -54,17 +50,29 @@ export class DrinksComponent implements OnInit {
 
   purchaseDrink() {
     console.log(`Selected Drink Value on purchaseDrink(): ${this.selectedDrinkValue}`)
-    const json = drinkNameToJson(this.selectedDrinkValue)
+    const json = this.vendingService.convertToJson(this.selectedDrinkValue)
     console.log(`Json for purchaseDrink(): ${json}`)
-    this.http.post("http://localhost:8080/drinks/purchase", json, this.httpOptions).toPromise()
-      .then(purchaseResponse => {
-        const str = JSON.stringify(purchaseResponse)
-        console.log(str)
-        const purchaseData = JSON.parse(str)
-        console.log(purchaseData)
-        this.purchasedDrink = purchaseData.drink
-        console.log(`${this.purchasedDrink} Purchased!`);
-      })
+
+      this.http.post("http://localhost:8080/purchase", json, this.httpOptions).toPromise()
+        .then(purchaseResponse => {
+          try {
+          const str = JSON.stringify(purchaseResponse)
+          console.log(str)
+          const purchaseData = JSON.parse(str)
+          console.log(purchaseData)
+          this.purchasedDrink = purchaseData.drink
+          // @ts-ignore
+          const msg = `${this.purchasedDrink.name} Purchased.`
+          console.log(msg);
+          this.vendingService.addMessage(msg)
+          // @ts-ignore
+          this.vendingService.addPurchasedDrink(this.purchasedDrink)
+          }catch (e) {
+            console.log("Purchase Drink Failed..")
+            console.log(e)
+          }
+        })
+
 
   }
 
@@ -75,12 +83,7 @@ export class DrinksComponent implements OnInit {
     console.log(target)
     this.selectedDrinkValue = target.value
     console.log(`Drink Selected: ${this.selectedDrinkValue}`)
-    const json = drinkNameToJson(this.selectedDrinkValue)
+    const json = this.vendingService.convertToJson(this.selectedDrinkValue)
     console.log(`Json:Selected Drink Value on purchaseDrink(): ${json}`)
   }
-}
-
-function drinkNameToJson(drinkName: string): string {
-  drinkName = drinkName.split(": ")[1]
-  return `{"name":"${drinkName}"}`
 }

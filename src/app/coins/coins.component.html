@@ -1,18 +1,17 @@
-<div>
+<div class="col-sm jumbotron padme">
+  <h2>Coins</h2>
   <form [formGroup]="form" (ngSubmit)="insertCoin()">
-    <h2>Select Coin:</h2>
-    <select [formControl]="selectedCoinControl" (change)="selectCoin($event)" [value]='{"name":"FIVE_PENCE"}'>
-      <option value='{"name":"FIVE_PENCE"}'>5p</option>
-      <option value='{"name":"TEN_PENCE"}'>10p</option>
-      <option value='{"name":"TWENTY_PENCE"}'>20p</option>
-      <option value='{"name":"FIFTY_PENCE"}'>50p</option>
-      <option value='{"name":"ONE_POUND"}'>£1</option>
+    <label class="h6">Select Coin: </label>
+    <select [formControl]="selectedCoinControl" (change)="selectCoin($event)">
+      <option value="" selected disabled hidden>Choose Coin</option>
+      <option *ngFor="let coin of acceptedCoins" [ngValue]="coin.name">{{convertToView(coin)}}</option>
     </select>
     <button>Insert Coin</button>
   </form>
 
   <button (click)="refundCoins()">Refund Coins</button>
 
-  <div>Balance: {{balance}}</div>
+<!--  <div>Balance: {{balance}}p</div>-->
+
 
 </div>

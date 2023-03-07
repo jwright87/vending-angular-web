@@ -1,1 +1,8 @@
-/* You can add global styles to this file, and also import other style files */
+.padme {
+  padding-left: 10px !important;
+  padding-right: 100px !important;
+  margin: 10px !important;
+}
+
+H3 {display: inline;}
+H5 {display: inline;}

@@ -2,12 +2,14 @@ import {Component, Injectable, OnInit} from '@angular/core';
 import {FormControl, FormGroup, Validators} from "@angular/forms";
 import {HttpClient, HttpHeaders} from '@angular/common/http';
 import {Coin} from "./model/CoinDataModel";
+import {VendingService} from "../vending.service";
+import {verifyHostBindings} from "@angular/compiler";
 
 
 function convertToPojo(value: Object) {
   const str = JSON.stringify(value)
   const pojo = JSON.parse(str)
-  return pojo;
+  return pojo
 }
 
 @Component({
@@ -21,7 +23,6 @@ export class CoinsComponent implements OnInit {
   httpOptions = {
     headers: new HttpHeaders({'Content-Type': 'application/json'})
   }
-  balance: Object | undefined = "0"
   message: string = "";
 
   selectedCoinValue: string = ""
@@ -32,7 +33,7 @@ export class CoinsComponent implements OnInit {
   });
 
 
-  constructor(private http: HttpClient) {
+  constructor(private http: HttpClient,private vendingService:VendingService) {
 
   }
 
@@ -41,6 +42,13 @@ export class CoinsComponent implements OnInit {
     this.updateBalance()
   }
 
+  convertToView(coin:Coin):string {
+    if (coin.valueInPence<100) {
+      return `${coin.valueInPence}p`
+    }else {
+      return "£1"
+    }
+  }
 
   selectCoin(e: Event) {
     const target = e.target as HTMLOptionElement
@@ -52,8 +60,8 @@ export class CoinsComponent implements OnInit {
       console.log("Updating Balance...")
       const str: string = JSON.stringify(balanceResponse)
       const balance = JSON.parse(str)
-      this.balance = balance.balance;
       console.log("Balance is: " + balance.balance)
+      this.vendingService.setBalance(balance.balance)
     });
 
   }
@@ -67,28 +75,50 @@ export class CoinsComponent implements OnInit {
 
   insertCoin() {
     console.log(`Selected Coin Value on insertCoin(): ${this.selectedCoinValue}`)
-    const selectedCoinValue = this.selectedCoinValue
-    this.http.post("http://localhost:8080/coins/insert", selectedCoinValue, this.httpOptions)
-      .toPromise().then(() => this.updateBalance())
+    const json = this.vendingService.convertToJson(this.selectedCoinValue)
+    console.log(`Json for insertCoin(): ${json}`)
+    this.http.post("http://localhost:8080/coins/insert", json, this.httpOptions)
+      .toPromise().then((response) => {
+        this.updateBalance()
+      let str = JSON.stringify(response)
+      let pojo =JSON.parse(str)
+      this.vendingService.addMessage(pojo.message)
+      this.vendingService.log()
+    })
 
   }
 
-  refundCoins():string {
-    var message = "";
-    this.http.put("http://localhost:8080/coins/refund", this.httpOptions).subscribe({
+  refundCoins() {
+    let pojo = null;
+    const putObservable = this.http.put("http://localhost:8080/coins/refund", this.httpOptions)
+      putObservable.subscribe({
       next(value) {
-        console.log(value)
-        const pojo = convertToPojo(value);
-        message = pojo.message;
+        console.log("Refunding Coins! - First Subscriber..")
       },
       error(e) {
         console.log(e)
-        message = convertToPojo(e).message
+        pojo = convertToPojo(e)
+        console.log("Pojo:")
+        console.log(pojo)
       },
       complete() {
-        console.log('Coins ');
+        console.log('refundCoins Complete ');
       }
     })
-    return message;
+    putObservable.subscribe(data => {
+      console.log("Data Settting Subscriber...")
+      pojo = convertToPojo(data)
+      console.log(pojo.refundedCoins)
+      console.log(pojo.message)
+      this.updateBalance();
+      // @ts-ignore
+      this.vendingService.addMessage(pojo.message)
+      // @ts-ignore
+      this.vendingService.addRefundedCoins(pojo.refundedCoins)
+      this.vendingService.log()
+    })
+
   }
+
+
 }

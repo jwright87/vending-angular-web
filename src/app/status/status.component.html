@@ -1,1 +1,14 @@
-<p>status works!</p>
+<div class="jumbotron H3" xmlns="http://www.w3.org/1999/html">
+      <h5>Status:</h5>
+  {{statusMessage}}
+<br />
+  <h5>Balance:</h5>
+  {{balance}}p
+  <br />
+  <h5>Drinks Purchased:</h5>
+  <li *ngFor="let drink of drinksList">
+<ul>{{drink}}</ul>
+  </li>
+<br />
+  <button (click)="reset()">Reset Vending Machine</button>
+</div>

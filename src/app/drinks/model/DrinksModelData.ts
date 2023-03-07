@@ -1,14 +1,8 @@
-export class Drink {
+export interface Drink {
 
   name: string
 
+  cost: number
 
-  constructor(name: string) {
-    this.name = name;
-  }
-
-  formatToJson():string {
-    return `{"name":"${this.name}"}`
-  }
 }
 
